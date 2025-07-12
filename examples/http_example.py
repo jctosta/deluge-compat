@@ -5,7 +5,7 @@ import sys
 import os
 
 # Add the src directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from deluge_compat import run_deluge_script
 
@@ -13,8 +13,8 @@ from deluge_compat import run_deluge_script
 def test_http_operations():
     """Test HTTP GET request simulation."""
     print("=== Testing HTTP Operations ===")
-    
-    script = '''
+
+    script = """
     result = Map();
     
     // Simulate a simple GET request
@@ -28,15 +28,15 @@ def test_http_operations():
     info "HTTP request completed";
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("HTTP result:", result)
-        
+
         for key, value in result.items():
             print(f"  {key}: {value}")
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -44,9 +44,9 @@ def test_http_operations():
 def test_invokeurl():
     """Test invokeurl block translation."""
     print("\n=== Testing invokeurl Block ===")
-    
+
     # This is a simplified version - the translator would handle the full syntax
-    script = '''
+    script = """
     result = Map();
     
     // Simple invokeurl example (simplified)
@@ -60,12 +60,12 @@ def test_invokeurl():
     result.put("has_response", response.length() > 0);
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("invokeurl result:", result)
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -73,8 +73,8 @@ def test_invokeurl():
 def test_encoding_functions():
     """Test encoding/decoding functions."""
     print("\n=== Testing Encoding Functions ===")
-    
-    script = '''
+
+    script = """
     original = "Hello World!";
     result = Map();
     
@@ -97,15 +97,15 @@ def test_encoding_functions():
     result.put("url_decoded", url_decoded);
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("Encoding result:", result)
-        
+
         for key, value in result.items():
             print(f"  {key}: {value}")
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -114,5 +114,5 @@ if __name__ == "__main__":
     test_http_operations()
     test_invokeurl()
     test_encoding_functions()
-    
+
     print("\n=== HTTP Tests Completed ===")

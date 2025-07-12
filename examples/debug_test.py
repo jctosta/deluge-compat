@@ -5,7 +5,7 @@ import sys
 import os
 
 # Add the src directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from deluge_compat import run_deluge_script
 
@@ -13,8 +13,8 @@ from deluge_compat import run_deluge_script
 def test_simple_conditional():
     """Test a simple conditional."""
     print("=== Testing Simple Conditional ===")
-    
-    script = '''
+
+    script = """
     score = 85;
     if(score >= 90) {
         grade = "A";
@@ -22,12 +22,12 @@ def test_simple_conditional():
         grade = "B";
     }
     return grade;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("Result:", result)
-    
+
     except Exception as e:
         print(f"Error: {e}")
 

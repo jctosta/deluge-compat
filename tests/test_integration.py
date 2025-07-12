@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import patch, Mock
-from deluge_compat import run_deluge_script, DelugeRuntime, Map, List
+from deluge_compat import run_deluge_script, Map, List
 
 
 # Integration tests for complete Deluge compatibility scenarios
@@ -10,10 +10,10 @@ from deluge_compat import run_deluge_script, DelugeRuntime, Map, List
 
 class TestIntegrationScenarios:
     """Test complete integration scenarios."""
-    
+
     def test_data_processing_pipeline(self):
         """Test a complete data processing pipeline."""
-        script = '''
+        script = """
         // Input data
         raw_data = List();
         
@@ -77,32 +77,32 @@ class TestIntegrationScenarios:
         summary.put("adult_count", adults.size());
         
         return summary;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         assert result.get("total_users") == 3
-        
+
         processed = result.get("processed_users")
         assert isinstance(processed, List)
         assert processed.size() == 3
-        
+
         # Check first processed record
         first_record = processed.get(0)
         assert first_record.get("first_name") == "Alice"
         assert first_record.get("email_domain") == "example.com"
         assert first_record.get("is_adult") is True
-        
+
         # Check example emails
         example_emails = result.get("example_emails")
         assert example_emails.size() == 2
         assert "alice@example.com" in example_emails
         assert "charlie@example.com" in example_emails
-    
+
     def test_text_processing_scenario(self):
         """Test text processing capabilities."""
-        script = '''
+        script = """
         // Input text
         text = "The Quick Brown Fox Jumps Over The Lazy Dog";
         
@@ -140,21 +140,21 @@ class TestIntegrationScenarios:
         result.put("first_20_chars", first_sentence);
         
         return result;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         assert result.get("length") == 43
         assert result.get("word_count") == 9
         assert result.get("contains_fox") is True
         assert result.get("starts_with_the") is True
-        
+
         long_words = result.get("long_words")
         assert "brown" in long_words
         assert "jumps" in long_words
-    
-    @patch('requests.get')
+
+    @patch("requests.get")
     def test_api_integration_scenario(self, mock_get):
         """Test API integration scenario."""
         # Mock API response
@@ -162,8 +162,8 @@ class TestIntegrationScenarios:
         mock_response.text = '{"users": [{"name": "John", "active": true}, {"name": "Jane", "active": false}]}'
         mock_response.status_code = 200
         mock_get.return_value = mock_response
-        
-        script = '''
+
+        script = """
         // Fetch data from API
         api_url = "https://api.example.com/users";
         response = getUrl(api_url);
@@ -192,16 +192,16 @@ class TestIntegrationScenarios:
         result.put("active_count", active_users.size());
         
         return result;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         mock_get.assert_called_once_with("https://api.example.com/users", headers={})
-    
+
     def test_mathematical_computation_scenario(self):
         """Test mathematical computations."""
-        script = '''
+        script = """
         // Generate some numbers
         numbers = List();
         numbers.add(10);
@@ -237,10 +237,10 @@ class TestIntegrationScenarios:
         result.put("random_generated", random_num >= 1 && random_num < 100);
         
         return result;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         assert result.get("total") == 85
         assert result.get("count") == 5
@@ -251,10 +251,10 @@ class TestIntegrationScenarios:
         assert result.get("min_5_15") == 5
         assert result.get("max_5_15") == 15
         assert result.get("random_generated") is True
-    
+
     def test_encoding_decoding_scenario(self):
         """Test encoding and decoding operations."""
-        script = '''
+        script = """
         original_text = "Hello World! This is a test message.";
         result = Map();
         
@@ -282,24 +282,24 @@ class TestIntegrationScenarios:
         result.put("aes_sample", aes_encrypted);
         
         return result;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         assert result.get("base64_round_trip") is True
         assert result.get("url_round_trip") is True
         assert result.get("aes_round_trip") is True
-        
+
         # Check that encoded values are different from original
         original = str(result.get("original"))
         assert str(result.get("base64_sample")) != original
         assert str(result.get("url_sample")) != original
         assert str(result.get("aes_sample")) != original
-    
+
     def test_complex_data_structure_scenario(self):
         """Test working with complex nested data structures."""
-        script = '''
+        script = """
         // Create a complex data structure
         company = Map();
         company.put("name", "Tech Corp");
@@ -361,16 +361,16 @@ class TestIntegrationScenarios:
         result.put("company_structure", company);
         
         return result;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         assert result.get("company_name") == "Tech Corp"
         assert result.get("total_departments") == 2
         assert result.get("total_budget") == 700000
         assert result.get("total_employees") == 5
-        
+
         all_employees = result.get("all_employees")
         assert all_employees.size() == 5
         assert "Alice" in all_employees
@@ -379,20 +379,20 @@ class TestIntegrationScenarios:
 
 class TestErrorScenarios:
     """Test error handling in integration scenarios."""
-    
+
     def test_malformed_json_handling(self):
         """Test handling of malformed JSON."""
-        script = '''
+        script = """
         bad_json = "{ invalid json }";
         try_parse = bad_json.toMap();
-        '''
-        
+        """
+
         with pytest.raises(Exception):  # Should raise some kind of error
             run_deluge_script(script)
-    
+
     def test_list_index_out_of_bounds(self):
         """Test graceful handling of list index errors."""
-        script = '''
+        script = """
         small_list = List();
         small_list.add("only_item");
         
@@ -401,10 +401,10 @@ class TestErrorScenarios:
         result.put("invalid_item", small_list.get(10));  # Should return None
         
         return result;
-        '''
-        
+        """
+
         result = run_deluge_script(script)
-        
+
         assert isinstance(result, Map)
         assert result.get("valid_item") == "only_item"
         assert result.get("invalid_item") is None

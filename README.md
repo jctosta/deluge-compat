@@ -18,10 +18,7 @@ git clone git@github.com:jctosta/deluge-compat.git
 cd deluge-compat
 
 # Install dependencies using uv
-uv install
-
-# Or install in development mode
-uv pip install -e .
+uv add https://github.com/jctosta/deluge-compat.git
 ```
 
 ## Quick Start
@@ -246,7 +243,7 @@ uv run pytest -v
 
 # Run specific test categories
 uv run pytest tests/test_types.py          # Test data types
-uv run pytest tests/test_functions.py      # Test built-in functions  
+uv run pytest tests/test_functions.py      # Test built-in functions
 uv run pytest tests/test_runtime.py        # Test script execution
 uv run pytest tests/test_showcase.py       # Test working features
 
@@ -356,7 +353,7 @@ uv run pytest tests/test_showcase.py -v
 ### Code Structure
 
 - `src/deluge_compat/types.py` - Add new data type methods
-- `src/deluge_compat/functions.py` - Add new built-in functions  
+- `src/deluge_compat/functions.py` - Add new built-in functions
 - `src/deluge_compat/translator.py` - Improve syntax translation
 - `tests/` - Add tests for new functionality
 

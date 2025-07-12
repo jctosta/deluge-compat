@@ -1,15 +1,23 @@
 [project]
 name = "deluge-compat"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.0.0"
+description = "A Python compatibility layer that allows you to execute Deluge scripts within Python environments."
 readme = "README.md"
 authors = [
     { name = "Carlos Tosta", email = "jctosta86@gmail.com" }
 ]
-requires-python = ">=3.12"
+license = { file = "LICENSE"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["deluge", "zoho", "compatibility"]
+requires-python = ">=3.10"
 dependencies = [
     "requests>=2.32.4",
 ]
+Project-URL = "Homepage, https://github.com/jctosta/deluge-compat"
 
 [build-system]
 requires = ["hatchling"]
@@ -17,5 +25,6 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "pyright>=1.1.403",
     "pytest>=8.4.1",
 ]

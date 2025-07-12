@@ -5,16 +5,16 @@ import sys
 import os
 
 # Add the src directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from deluge_compat import run_deluge_script, Map, List
+from deluge_compat import run_deluge_script, Map
 
 
 def test_simple_script():
     """Test a simple Deluge script."""
     print("=== Testing Simple Deluge Script ===")
-    
-    script = '''
+
+    script = """
     response = Map();
     name = "Python";
     message = "Hello from " + name + "!";
@@ -33,19 +33,19 @@ def test_simple_script():
     info "Script executed successfully";
     
     return response;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("Result:", result)
         print("Type:", type(result))
-        
+
         if isinstance(result, Map):
             print("Greeting:", result.get("greeting"))
             print("Success:", result.get("success"))
             print("Items:", result.get("items"))
             print("Item count:", result.get("item_count"))
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -53,8 +53,8 @@ def test_simple_script():
 def test_string_operations():
     """Test string operations."""
     print("\n=== Testing String Operations ===")
-    
-    script = '''
+
+    script = """
     text = "Hello World";
     result = Map();
     
@@ -67,15 +67,15 @@ def test_string_operations():
     result.put("substring", text.substring(0, 5));
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("String operations result:", result)
-        
+
         for key, value in result.items():
             print(f"  {key}: {value} ({type(value).__name__})")
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -83,8 +83,8 @@ def test_string_operations():
 def test_conditional_logic():
     """Test conditional logic."""
     print("\n=== Testing Conditional Logic ===")
-    
-    script = '''
+
+    script = """
     score = 85;
     result = Map();
     
@@ -102,12 +102,12 @@ def test_conditional_logic():
     result.put("grade", grade);
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("Conditional logic result:", result)
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -115,8 +115,8 @@ def test_conditional_logic():
 def test_loops():
     """Test loop structures."""
     print("\n=== Testing Loops ===")
-    
-    script = '''
+
+    script = """
     numbers = List();
     numbers.add(1);
     numbers.add(2);
@@ -139,12 +139,12 @@ def test_loops():
     result.put("squares", squares);
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script)
         print("Loop result:", result)
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -152,8 +152,8 @@ def test_loops():
 def test_with_context():
     """Test script execution with additional context."""
     print("\n=== Testing with Additional Context ===")
-    
-    script = '''
+
+    script = """
     result = Map();
     result.put("username", username);
     result.put("age", age);
@@ -169,12 +169,12 @@ def test_with_context():
     result.put("greeting", greeting);
     
     return result;
-    '''
-    
+    """
+
     try:
         result = run_deluge_script(script, username="Alice", age=25)
         print("Context result:", result)
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -185,5 +185,5 @@ if __name__ == "__main__":
     test_conditional_logic()
     test_loops()
     test_with_context()
-    
+
     print("\n=== All Tests Completed ===")

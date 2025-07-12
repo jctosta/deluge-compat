@@ -3,25 +3,28 @@
 import requests
 import base64
 import urllib.parse
-import json
 import random
 import math
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Optional
 from .types import Map, List, DelugeString, deluge_string
 
 
-def getUrl(url: str, simple: bool = True, headers: Dict[str, str] = None) -> Union[str, Map]:
+def getUrl(
+    url: str, simple: bool = True, headers: Optional[Dict[str, str]] = None
+) -> Union[str, Map]:
     """Perform a GET request to URL."""
     try:
         response = requests.get(url, headers=headers or {})
         if simple:
             return deluge_string(response.text)
         else:
-            return Map({
-                "status_code": response.status_code,
-                "text": response.text,
-                "headers": dict(response.headers)
-            })
+            return Map(
+                {
+                    "status_code": response.status_code,
+                    "text": response.text,
+                    "headers": dict(response.headers),
+                }
+            )
     except Exception as e:
         if simple:
             return deluge_string("")
@@ -29,21 +32,28 @@ def getUrl(url: str, simple: bool = True, headers: Dict[str, str] = None) -> Uni
             return Map({"error": str(e)})
 
 
-def postUrl(url: str, body: Map = None, headers: Map = None, simple: bool = True) -> Union[str, Map]:
+def postUrl(
+    url: str,
+    body: Optional[Map] = None,
+    headers: Optional[Map] = None,
+    simple: bool = True,
+) -> Union[str, Map]:
     """Perform a POST request to URL."""
     try:
         post_headers = dict(headers) if headers else {}
         post_data = dict(body) if body else {}
-        
+
         response = requests.post(url, json=post_data, headers=post_headers)
         if simple:
             return deluge_string(response.text)
         else:
-            return Map({
-                "status_code": response.status_code,
-                "text": response.text,
-                "headers": dict(response.headers)
-            })
+            return Map(
+                {
+                    "status_code": response.status_code,
+                    "text": response.text,
+                    "headers": dict(response.headers),
+                }
+            )
     except Exception as e:
         if simple:
             return deluge_string("")
@@ -68,15 +78,15 @@ def urlDecode(url: str) -> DelugeString:
 
 def base64Encode(text: str) -> DelugeString:
     """Base64 encode a string."""
-    encoded_bytes = base64.b64encode(text.encode('utf-8'))
-    return deluge_string(encoded_bytes.decode('utf-8'))
+    encoded_bytes = base64.b64encode(text.encode("utf-8"))
+    return deluge_string(encoded_bytes.decode("utf-8"))
 
 
 def base64Decode(text: str) -> DelugeString:
     """Base64 decode a string."""
     try:
-        decoded_bytes = base64.b64decode(text.encode('utf-8'))
-        return deluge_string(decoded_bytes.decode('utf-8'))
+        decoded_bytes = base64.b64decode(text.encode("utf-8"))
+        return deluge_string(decoded_bytes.decode("utf-8"))
     except Exception:
         return deluge_string("")
 
@@ -85,6 +95,7 @@ def aesEncode(key: str, text: str) -> DelugeString:
     """AES encrypt text (simplified implementation)."""
     # This is a placeholder - real AES encryption would require cryptography library
     import hashlib
+
     hash_key = hashlib.md5(key.encode()).hexdigest()
     # Simple XOR-based "encryption" for demo purposes
     result = ""
@@ -97,6 +108,7 @@ def aesDecode(key: str, encrypted_text: str) -> DelugeString:
     """AES decrypt text (simplified implementation)."""
     try:
         import hashlib
+
         hash_key = hashlib.md5(key.encode()).hexdigest()
         decoded = base64.b64decode(encrypted_text.encode()).decode()
         result = ""
@@ -147,7 +159,9 @@ def exp_func(number: Union[int, float]) -> float:
     return math.exp(number)
 
 
-def power_func(base: Union[int, float], exponent: Union[int, float]) -> Union[int, float]:
+def power_func(
+    base: Union[int, float], exponent: Union[int, float]
+) -> Union[int, float]:
     """Power function."""
     return pow(base, exponent)
 
@@ -198,7 +212,7 @@ def sendemail(*args, **kwargs) -> Map:
 
 
 def sendsms(*args, **kwargs) -> Map:
-    """Placeholder for sending SMS.""" 
+    """Placeholder for sending SMS."""
     return Map({"status": "sms_sent"})
 
 
@@ -224,38 +238,38 @@ def replaceAll(text: str, search: str, replace: str) -> DelugeString:
 
 # Create aliases for math functions to match Deluge naming
 BUILTIN_FUNCTIONS = {
-    'getUrl': getUrl,
-    'postUrl': postUrl,
-    'encodeUrl': encodeUrl,
-    'urlEncode': urlEncode,
-    'urlDecode': urlDecode,
-    'base64Encode': base64Encode,
-    'base64Decode': base64Decode,
-    'aesEncode': aesEncode,
-    'aesDecode': aesDecode,
-    'abs': abs_func,
-    'cos': cos_func,
-    'sin': sin_func,
-    'tan': tan_func,
-    'log': log_func,
-    'min': min_func,
-    'max': max_func,
-    'exp': exp_func,
-    'power': power_func,
-    'round': round_func,
-    'sqrt': sqrt_func,
-    'toDecimal': toDecimal,
-    'toHex': toHex,
-    'ceil': ceil_func,
-    'floor': floor_func,
-    'randomNumber': randomNumber,
-    'info': info,
-    'sendemail': sendemail,
-    'sendsms': sendsms,
-    'pushNotification': pushNotification,
-    'Collection': Collection,
-    'Map': Map,
-    'List': List,
-    'ifnull': ifnull,
-    'replaceAll': replaceAll,
+    "getUrl": getUrl,
+    "postUrl": postUrl,
+    "encodeUrl": encodeUrl,
+    "urlEncode": urlEncode,
+    "urlDecode": urlDecode,
+    "base64Encode": base64Encode,
+    "base64Decode": base64Decode,
+    "aesEncode": aesEncode,
+    "aesDecode": aesDecode,
+    "abs": abs_func,
+    "cos": cos_func,
+    "sin": sin_func,
+    "tan": tan_func,
+    "log": log_func,
+    "min": min_func,
+    "max": max_func,
+    "exp": exp_func,
+    "power": power_func,
+    "round": round_func,
+    "sqrt": sqrt_func,
+    "toDecimal": toDecimal,
+    "toHex": toHex,
+    "ceil": ceil_func,
+    "floor": floor_func,
+    "randomNumber": randomNumber,
+    "info": info,
+    "sendemail": sendemail,
+    "sendsms": sendsms,
+    "pushNotification": pushNotification,
+    "Collection": Collection,
+    "Map": Map,
+    "List": List,
+    "ifnull": ifnull,
+    "replaceAll": replaceAll,
 }
