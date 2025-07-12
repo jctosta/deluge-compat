@@ -52,9 +52,14 @@ class DelugeRuntime:
             exec_locals = {}
             
             # Wrap the code in a function to handle return statements
+            # Handle empty scripts by adding 'pass' statement
+            indented_code = self._indent_code(python_code, 1)
+            if not indented_code.strip():
+                indented_code = "    pass"
+            
             wrapped_code = f"""
 def _deluge_script():
-{self._indent_code(python_code, 1)}
+{indented_code}
 
 _result = _deluge_script()
 """

@@ -216,8 +216,17 @@ class TestConvenienceFunctions:
     
     def test_empty_script(self):
         """Test execution of empty script."""
-        # Skip this test as it's failing due to translator issues
-        pytest.skip("Translator needs improvement for empty scripts")
+        # Test empty script
+        result = run_deluge_script("")
+        assert result is None
+        
+        # Test whitespace-only script
+        result = run_deluge_script("   \n  \n  ")
+        assert result is None
+        
+        # Test comment-only script
+        result = run_deluge_script("// Just a comment")
+        assert result is None
     
     def test_script_without_return(self):
         """Test script without explicit return."""

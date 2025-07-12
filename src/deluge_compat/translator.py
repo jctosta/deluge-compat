@@ -62,7 +62,10 @@ class DelugeTranslator:
                     quote_char = char
                     result.append(char)
                 elif char == '/' and i + 1 < len(line) and line[i + 1] == '/':
-                    # Found comment outside string, stop here
+                    # Found // comment outside string, stop here
+                    break
+                elif char == '#':
+                    # Found # comment outside string, stop here
                     break
                 else:
                     result.append(char)
@@ -131,7 +134,7 @@ class DelugeTranslator:
             self.brace_stack.append('block')
             return ''
         
-        # Handle invokeurl blocks
+        # Handle invokeurl blocks (check this early, before error detection)
         elif line.startswith('invokeurl'):
             return self._translate_invokeurl_start(line)
         elif line == '];':
@@ -147,11 +150,20 @@ class DelugeTranslator:
         
         # Handle variable declarations and assignments
         elif '=' in line and not any(op in line for op in ['==', '!=', '<=', '>=']):
-            return self._translate_assignment(line)
+            # Check if this is an invokeurl assignment
+            if 'invokeurl' in line:
+                return self._translate_invokeurl_start(line)
+            else:
+                return self._translate_assignment(line)
         
         # Handle statements ending with semicolon
         elif line.endswith(';'):
             return self._translate_statement(line)
+        
+        # If we reach here, the line couldn't be translated
+        # But skip error for invokeurl context or comment lines
+        elif line.strip() and not line.startswith('//') and not line.startswith('#') and not self.in_invokeurl:
+            raise ValueError(f"Unable to translate Deluge syntax: '{line}'")
         
         return ''
     
