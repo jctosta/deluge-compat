@@ -202,6 +202,7 @@ class TestIntegrationScenarios:
         assert isinstance(result, Map)
         mock_get.assert_called_once_with("https://api.example.com/users", headers={})
     
+    @pytest.mark.xfail(False, reason="This test now passes")
     def test_mathematical_computation_scenario(self):
         """Test mathematical computations."""
         script = '''
