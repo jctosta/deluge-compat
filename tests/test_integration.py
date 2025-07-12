@@ -12,6 +12,7 @@ pytestmark = pytest.mark.xfail(reason="Complex scripts require improved translat
 class TestIntegrationScenarios:
     """Test complete integration scenarios."""
     
+    @pytest.mark.xfail(False, reason="This test now passes")
     def test_data_processing_pipeline(self):
         """Test a complete data processing pipeline."""
         script = '''
@@ -101,6 +102,7 @@ class TestIntegrationScenarios:
         assert "alice@example.com" in example_emails
         assert "charlie@example.com" in example_emails
     
+    @pytest.mark.xfail(False, reason="This test now passes")
     def test_text_processing_scenario(self):
         """Test text processing capabilities."""
         script = '''

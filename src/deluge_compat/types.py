@@ -29,6 +29,13 @@ class Map(dict):
         """Check if the map contains a value."""
         return value in self.values()
     
+    def get(self, key: Any, default: Any = None) -> Any:
+        """Get value by key, wrapping strings as DelugeStrings."""
+        value = super().get(key, default)
+        if isinstance(value, str) and not isinstance(value, DelugeString):
+            return DelugeString(value)
+        return value
+    
     def keys(self) -> 'List':
         """Get all keys as a Deluge List."""
         return List(super().keys())
@@ -99,6 +106,14 @@ class List(list):
     def intersect(self, other_list: 'List') -> 'List':
         """Return common elements between lists."""
         return List([item for item in self if item in other_list])
+    
+    def __iter__(self):
+        """Iterate over list items, wrapping strings as DelugeStrings."""
+        for item in super().__iter__():
+            if isinstance(item, str) and not isinstance(item, DelugeString):
+                yield DelugeString(item)
+            else:
+                yield item
     
     def sublist(self, start_index: int, end_index: int = None) -> 'List':
         """Return a sublist."""
@@ -224,6 +239,10 @@ class DelugeString(str):
     def subText(self, start: int, end: int = None) -> 'DelugeString':
         """Alias for substring."""
         return self.substring(start, end)
+    
+    def equals(self, other: str) -> bool:
+        """Case-sensitive equality check."""
+        return str(self) == str(other)
     
     def equalsIgnoreCase(self, other: str) -> bool:
         """Case-insensitive equality check."""

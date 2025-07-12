@@ -117,7 +117,6 @@ class TestDelugeRuntime:
         assert result.get("age") == 25
         assert result.get("status") == "adult"
     
-    @pytest.mark.xfail(reason="Method call translation needs improvement")
     def test_function_calls(self):
         """Test script with built-in function calls."""
         script = '''
@@ -231,7 +230,6 @@ class TestConvenienceFunctions:
         # Should return None since no explicit return
         assert result is None
     
-    @pytest.mark.xfail(reason="Complex nested structures need translator improvement")
     def test_multiple_operations(self):
         """Test script with multiple complex operations."""
         script = '''
@@ -262,8 +260,8 @@ class TestConvenienceFunctions:
         result = run_deluge_script(script)
         assert isinstance(result, Map)
         assert result.get("original_count") == 3
-        # Note: Processed count depends on conditional translation working
-        # assert result.get("processed_count") == 2  # Alice and Charlie
+        assert result.get("processed_count") == 2  # Alice and Charlie
+        assert isinstance(result.get("processed_users"), List)
 
 
 class TestRuntimeErrorCases:
