@@ -154,7 +154,6 @@ class TestIntegrationScenarios:
         assert "brown" in long_words
         assert "jumps" in long_words
     
-    @pytest.mark.xfail(reason="Complex API integration with JSON array processing")
     @patch('requests.get')
     def test_api_integration_scenario(self, mock_get):
         """Test API integration scenario."""
@@ -200,7 +199,6 @@ class TestIntegrationScenarios:
         assert isinstance(result, Map)
         mock_get.assert_called_once_with("https://api.example.com/users", headers={})
     
-    @pytest.mark.xfail(reason="Logical operators && need translation to 'and'")
     def test_mathematical_computation_scenario(self):
         """Test mathematical computations."""
         script = '''

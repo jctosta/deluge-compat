@@ -46,9 +46,43 @@ class DelugeTranslator:
         
         return code
     
+    def _remove_inline_comments(self, line: str) -> str:
+        """Remove inline comments but preserve // inside string literals."""
+        in_string = False
+        quote_char = None
+        result = []
+        
+        i = 0
+        while i < len(line):
+            char = line[i]
+            
+            if not in_string:
+                if char in ['"', "'"]:
+                    in_string = True
+                    quote_char = char
+                    result.append(char)
+                elif char == '/' and i + 1 < len(line) and line[i + 1] == '/':
+                    # Found comment outside string, stop here
+                    break
+                else:
+                    result.append(char)
+            else:
+                result.append(char)
+                if char == quote_char and (i == 0 or line[i-1] != '\\'):
+                    # End of string literal
+                    in_string = False
+                    quote_char = None
+            
+            i += 1
+        
+        return ''.join(result).strip()
+    
     def _translate_line(self, line: str) -> str:
         """Translate a single line of Deluge code."""
         line = line.strip()
+        
+        # Remove inline comments (but not // inside strings)
+        line = self._remove_inline_comments(line)
         
         # Skip empty lines and comments
         if not line or line.startswith('//'):
@@ -145,6 +179,9 @@ class DelugeTranslator:
         # Handle method calls on strings
         line = self._translate_string_methods(line)
         
+        # Handle logical operators
+        line = self._translate_logical_operators(line)
+        
         return self._get_indent() + line
     
     def _translate_if(self, line: str) -> str:
@@ -172,9 +209,9 @@ class DelugeTranslator:
         line_clean = line.rstrip('{').strip()
         
         # else/elif should be at the same level as the corresponding if
-        # So we need to temporarily decrease indent to match the if level
-        temp_indent_level = max(0, self.indent_level - 1) if line.endswith('{') else self.indent_level
-        indent_str = '    ' * temp_indent_level
+        # When we encounter else, we want to be at the current indent level
+        # (which should be correct after processing the closing brace)
+        indent_str = self._get_indent()
         
         if line_clean == 'else':
             return indent_str + 'else:'
@@ -221,6 +258,10 @@ class DelugeTranslator:
         # Handle boolean values
         condition = condition.replace(' true', ' True')
         condition = condition.replace(' false', ' False')
+        
+        # Handle logical operators
+        condition = condition.replace('&&', ' and ')
+        condition = condition.replace('||', ' or ')
         
         return condition
     
@@ -278,7 +319,14 @@ class DelugeTranslator:
         """Translate general statement."""
         line = line.rstrip(';')
         line = self._translate_string_methods(line)
+        line = self._translate_logical_operators(line)
         return self._get_indent() + line
+    
+    def _translate_logical_operators(self, text: str) -> str:
+        """Translate logical operators from Deluge to Python."""
+        text = text.replace('&&', ' and ')
+        text = text.replace('||', ' or ')
+        return text
     
     def _wrap_string_literals(self, text: str) -> str:
         """Wrap string literals with deluge_string() calls."""

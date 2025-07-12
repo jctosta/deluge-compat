@@ -271,7 +271,7 @@ class DelugeString(str):
         try:
             data = json.loads(self)
             if isinstance(data, dict):
-                return Map(data)
+                return _convert_json_to_deluge_types(data)
             else:
                 raise ValueError("String does not represent a JSON object")
         except json.JSONDecodeError as e:
@@ -332,7 +332,7 @@ class DelugeString(str):
         try:
             data = json.loads(self)
             if isinstance(data, list):
-                return List(data)
+                return _convert_json_to_deluge_types(data)
             else:
                 raise ValueError("String does not represent a JSON array")
         except json.JSONDecodeError as e:
@@ -354,3 +354,21 @@ class DelugeString(str):
 def deluge_string(s: str) -> DelugeString:
     """Convert a regular string to a Deluge string."""
     return DelugeString(s)
+
+
+def _convert_json_to_deluge_types(obj):
+    """Recursively convert JSON objects to Deluge types."""
+    if isinstance(obj, dict):
+        result = Map()
+        for key, value in obj.items():
+            result[key] = _convert_json_to_deluge_types(value)
+        return result
+    elif isinstance(obj, list):
+        result = List()
+        for item in obj:
+            result.append(_convert_json_to_deluge_types(item))
+        return result
+    elif isinstance(obj, str):
+        return DelugeString(obj)
+    else:
+        return obj
