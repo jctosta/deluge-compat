@@ -1,6 +1,6 @@
 [project]
 name = "deluge-compat"
-version = "1.0.0"
+version = "1.0.1"
 description = "A Python compatibility layer that allows you to execute Deluge scripts within Python environments."
 readme = "README.md"
 authors = [

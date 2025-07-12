@@ -23,7 +23,7 @@ uv add https://github.com/jctosta/deluge-compat.git
 
 ## Quick Start
 
-### Basic Usage
+### Basic Usage - Running Deluge Scripts
 
 ```python
 from deluge_compat import run_deluge_script
@@ -114,6 +114,41 @@ return result;
 
 result = run_deluge_script(script, username="Alice", age=25)
 print(result['message'])  # "Hello Alice!"
+```
+
+### Translating Deluge Scripts to Python
+
+The library can translate Deluge scripts to standalone Python code:
+
+```python
+from deluge_compat import translate_deluge_to_python
+
+deluge_script = '''
+numbers = List();
+numbers.add(1);
+numbers.add(2);
+numbers.add(3);
+
+sum = 0;
+for each num in numbers {
+    sum = sum + num;
+}
+
+result = Map();
+result.put("sum", sum);
+return result;
+'''
+
+# Translate with wrapper (creates runnable Python script)
+python_code = translate_deluge_to_python(deluge_script)
+print(python_code)
+
+# Save to file
+with open("my_script.py", "w") as f:
+    f.write(python_code)
+
+# Translate without wrapper (just the core code)
+raw_python = translate_deluge_to_python(deluge_script, wrap_in_function=False)
 ```
 
 ## Supported Deluge Features
