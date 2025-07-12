@@ -10,12 +10,14 @@ class DelugeTranslator:
     def __init__(self):
         self.indent_level = 0
         self.in_invokeurl = False
+        self.brace_stack = []  # Track opening braces and their contexts
     
     def translate(self, deluge_code: str) -> str:
         """Translate Deluge code to Python code."""
         # Reset state for each translation
         self.indent_level = 0
         self.in_invokeurl = False
+        self.brace_stack = []
         
         # Preprocess the code to handle } else { patterns
         preprocessed = self._preprocess_code(deluge_code)
@@ -36,34 +38,13 @@ class DelugeTranslator:
     
     def _preprocess_code(self, code: str) -> str:
         """Preprocess Deluge code to handle special patterns."""
-        # First handle inline } else { patterns
+        # Handle inline } else { patterns by breaking them into separate lines
         code = re.sub(r'}\s*else\s*{', '}\nelse {', code)
         
-        lines = code.split('\n')
-        processed_lines = []
+        # Handle } else if { patterns  
+        code = re.sub(r'}\s*else\s+if\s*\([^)]*\)\s*{', lambda m: '}\n' + m.group(0)[1:], code)
         
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            
-            # Handle } else { pattern (now on separate lines)
-            if line == '}' and i + 1 < len(lines):
-                next_line = lines[i + 1].strip()
-                if next_line.startswith('else'):
-                    # Add the closing brace
-                    processed_lines.append('}')
-                    # Add the else statement
-                    if next_line.endswith('{'):
-                        processed_lines.append(next_line[:-1].strip() + ' {')  # else with {
-                    else:
-                        processed_lines.append(next_line)
-                    i += 2  # Skip the next line since we processed it
-                    continue
-            
-            processed_lines.append(lines[i])
-            i += 1
-        
-        return '\n'.join(processed_lines)
+        return code
     
     def _translate_line(self, line: str) -> str:
         """Translate a single line of Deluge code."""
@@ -80,6 +61,8 @@ class DelugeTranslator:
         # Handle closing braces first (decrease indent before processing)
         if line == '}':
             self.indent_level -= 1
+            if self.brace_stack:
+                self.brace_stack.pop()
             return ''
         
         # Handle control structures that end with opening brace
@@ -87,26 +70,31 @@ class DelugeTranslator:
             result = self._translate_if(line)
             if line.rstrip().endswith('{'):
                 self.indent_level += 1
+                self.brace_stack.append('if')
             return result
         elif line.startswith('for each'):
             result = self._translate_for_each(line)
             if line.rstrip().endswith('{'):
                 self.indent_level += 1
+                self.brace_stack.append('for')
             return result
         elif line.startswith('while('):
             result = self._translate_while(line)
             if line.rstrip().endswith('{'):
                 self.indent_level += 1
+                self.brace_stack.append('while')
             return result
         elif line.startswith('else'):
             result = self._translate_else(line)
             if line.rstrip().endswith('{'):
                 self.indent_level += 1
+                self.brace_stack.append('else')
             return result
         
         # Handle standalone opening braces
         elif line == '{':
             self.indent_level += 1
+            self.brace_stack.append('block')
             return ''
         
         # Handle invokeurl blocks
