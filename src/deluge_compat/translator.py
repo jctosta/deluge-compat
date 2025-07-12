@@ -13,6 +13,10 @@ class DelugeTranslator:
     
     def translate(self, deluge_code: str) -> str:
         """Translate Deluge code to Python code."""
+        # Reset state for each translation
+        self.indent_level = 0
+        self.in_invokeurl = False
+        
         # Preprocess the code to handle } else { patterns
         preprocessed = self._preprocess_code(deluge_code)
         
@@ -32,6 +36,9 @@ class DelugeTranslator:
     
     def _preprocess_code(self, code: str) -> str:
         """Preprocess Deluge code to handle special patterns."""
+        # First handle inline } else { patterns
+        code = re.sub(r'}\s*else\s*{', '}\nelse {', code)
+        
         lines = code.split('\n')
         processed_lines = []
         
@@ -39,15 +46,15 @@ class DelugeTranslator:
         while i < len(lines):
             line = lines[i].strip()
             
-            # Handle } else { pattern
+            # Handle } else { pattern (now on separate lines)
             if line == '}' and i + 1 < len(lines):
                 next_line = lines[i + 1].strip()
                 if next_line.startswith('else'):
-                    # Combine closing brace with else
-                    processed_lines.append('')  # Empty line for closing brace
+                    # Add the closing brace
+                    processed_lines.append('}')
+                    # Add the else statement
                     if next_line.endswith('{'):
-                        processed_lines.append(next_line[:-1].strip())  # else without {
-                        processed_lines.append('')  # Empty line for opening brace
+                        processed_lines.append(next_line[:-1].strip() + ' {')  # else with {
                     else:
                         processed_lines.append(next_line)
                     i += 2  # Skip the next line since we processed it
@@ -70,23 +77,37 @@ class DelugeTranslator:
         if line.startswith('/*') or line.endswith('*/'):
             return ''
         
-        # Handle braces for indentation tracking
-        if line == '{':
-            self.indent_level += 1
-            return ''
-        elif line == '}':
+        # Handle closing braces first (decrease indent before processing)
+        if line == '}':
             self.indent_level -= 1
             return ''
         
-        # Handle control structures first
-        elif line.startswith('if(') or line.startswith('if '):
-            return self._translate_if(line)
+        # Handle control structures that end with opening brace
+        if line.startswith('if(') or line.startswith('if '):
+            result = self._translate_if(line)
+            if line.rstrip().endswith('{'):
+                self.indent_level += 1
+            return result
         elif line.startswith('for each'):
-            return self._translate_for_each(line)
+            result = self._translate_for_each(line)
+            if line.rstrip().endswith('{'):
+                self.indent_level += 1
+            return result
         elif line.startswith('while('):
-            return self._translate_while(line)
+            result = self._translate_while(line)
+            if line.rstrip().endswith('{'):
+                self.indent_level += 1
+            return result
         elif line.startswith('else'):
-            return self._translate_else(line)
+            result = self._translate_else(line)
+            if line.rstrip().endswith('{'):
+                self.indent_level += 1
+            return result
+        
+        # Handle standalone opening braces
+        elif line == '{':
+            self.indent_level += 1
+            return ''
         
         # Handle invokeurl blocks
         elif line.startswith('invokeurl'):
@@ -162,8 +183,10 @@ class DelugeTranslator:
         """Translate else statement."""
         line_clean = line.rstrip('{').strip()
         
-        # Use current indent level for else/elif (should be same as the if)
-        indent_str = self._get_indent()
+        # else/elif should be at the same level as the corresponding if
+        # So we need to temporarily decrease indent to match the if level
+        temp_indent_level = max(0, self.indent_level - 1) if line.endswith('{') else self.indent_level
+        indent_str = '    ' * temp_indent_level
         
         if line_clean == 'else':
             return indent_str + 'else:'

@@ -52,7 +52,6 @@ class TestDelugeRuntime:
         assert isinstance(result, Map)
         assert "Hello Alice!" in str(result.get("greeting"))
     
-    @pytest.mark.xfail(reason="Loop indentation issues in translator")
     def test_list_operations(self):
         """Test script with list operations."""
         script = '''
@@ -98,7 +97,6 @@ class TestDelugeRuntime:
         assert result.get("length") == 11
         assert result.get("contains_hello") is True
     
-    @pytest.mark.xfail(reason="Conditional indentation issues in translator")
     def test_conditional_logic(self):
         """Test script with conditional logic."""
         script = '''
@@ -117,8 +115,7 @@ class TestDelugeRuntime:
         result = self.runtime.execute(script)
         assert isinstance(result, Map)
         assert result.get("age") == 25
-        # Note: This might fail due to conditional translation issues
-        # assert result.get("status") == "adult"
+        assert result.get("status") == "adult"
     
     @pytest.mark.xfail(reason="Method call translation needs improvement")
     def test_function_calls(self):
