@@ -27,6 +27,29 @@ class TestMap:
         assert m.get("nonexistent") is None
         assert len(m) == 2
 
+    def test_size(self):
+        """Test size method."""
+        m = Map()
+        assert m.size() == 0
+
+        m.put("key1", "value1")
+        assert m.size() == 1
+
+        m.put("key2", "value2")
+        m.put("key3", "value3")
+        assert m.size() == 3
+
+        # Test with actual data from SalesIQ functions
+        from deluge_compat.salesiq.functions import visitorsession_get, visitorsession_set
+
+        data = Map()
+        data.put("test", "value")
+        set_result = visitorsession_set("portal", data, "conn")
+        get_result = visitorsession_get("portal", "test", "conn")
+
+        assert set_result.size() == 2  # 'status' and 'stored_keys'
+        assert get_result.size() == 2  # 'data' and 'test_response'
+
     def test_containKey(self):
         """Test containKey method."""
         m = Map()

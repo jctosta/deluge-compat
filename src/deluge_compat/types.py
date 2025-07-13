@@ -21,6 +21,10 @@ class Map(dict):
         """Check if the map is empty."""
         return len(self) == 0
 
+    def size(self) -> int:
+        """Get the size of the map."""
+        return len(self)
+
     def containKey(self, key: Any) -> bool:
         """Check if the map contains a key."""
         return key in self
