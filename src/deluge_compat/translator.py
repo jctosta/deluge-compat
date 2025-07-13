@@ -324,8 +324,27 @@ class DelugeTranslator:
             # Wrap string values in quotes if not already quoted
             if not (value.startswith('"') and value.endswith('"')):
                 if not value.startswith("(") and not value.isdigit():
-                    # Check if it's a variable reference
-                    if not any(c in value for c in [".", "(", ")", "+", "-", "*", "/"]):
+                    # Check if it's a variable reference or function call
+                    # Don't quote if it contains variable-like patterns or method calls
+                    is_variable_reference = (
+                        # Has method calls or property access
+                        any(c in value for c in [".", "(", ")", "+", "-", "*", "/"])
+                        or
+                        # Boolean values
+                        value in ["true", "false", "True", "False"]
+                        or
+                        # None/null values
+                        value in ["null", "None", "NULL"]
+                        or
+                        # Variables that start with lowercase (common convention)
+                        (
+                            value.replace("_", "").replace("-", "").isalnum()
+                            and value[0].islower()
+                            and len(value) > 1
+                        )
+                    )
+
+                    if not is_variable_reference:
                         value = f'"{value}"'
 
             return self._get_indent() + f'    "{key}": {value},'
@@ -451,16 +470,29 @@ class DelugeTranslator:
 def _invokeurl(params: dict[str, Any]) -> Any:  # pyright: ignore[reportUnusedFunction]
     """Execute an HTTP request based on invokeurl parameters."""
     from .functions import getUrl, postUrl
+    from .types import Map
 
     url = params.get("url", "")
     request_type = params.get("type", "GET").upper()
     headers = params.get("headers", {})
+    body = params.get("body", {})
     parameters = params.get("parameters", {})
+
+    # Convert Map objects to dictionaries for JSON serialization
+    if isinstance(body, Map):
+        body = dict(body)
+    elif hasattr(body, "__dict__"):
+        body = body.__dict__
+
+    # Use body if provided, otherwise fall back to parameters for backward compatibility
+    request_body = body if body else parameters
+    if isinstance(request_body, Map):
+        request_body = dict(request_body)
 
     if request_type == "GET":
         return getUrl(url, headers=headers)
     elif request_type == "POST":
-        return postUrl(url, body=parameters, headers=headers)
+        return postUrl(url, body=request_body, headers=headers)
     else:
         # For other HTTP methods, use requests directly
         try:
@@ -468,7 +500,7 @@ def _invokeurl(params: dict[str, Any]) -> Any:  # pyright: ignore[reportUnusedFu
 
             method = request_type.lower()
             if hasattr(requests, method):
-                response = getattr(requests, method)(url, json=parameters, headers=headers)
+                response = getattr(requests, method)(url, json=request_body, headers=headers)
                 return response.text
             else:
                 return "Unsupported HTTP method"

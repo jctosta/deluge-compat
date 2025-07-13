@@ -34,16 +34,24 @@ def getUrl(url: str, simple: bool = True, headers: dict[str, str] | None = None)
 
 def postUrl(
     url: str,
-    body: Map | None = None,
-    headers: Map | None = None,
+    body: Any = None,
+    headers: Any = None,
     simple: bool = True,
 ) -> str | Map:
     """Perform a POST request to URL."""
     try:
         post_headers = dict(headers) if headers else {}
-        post_data = dict(body) if body else {}
 
-        response = requests.post(url, json=post_data, headers=post_headers)
+        # Handle different body types
+        if isinstance(body, dict) or hasattr(body, "items"):
+            post_data = dict(body) if body else {}
+            response = requests.post(url, json=post_data, headers=post_headers)
+        elif isinstance(body, str):
+            # For string bodies, send as data instead of json
+            response = requests.post(url, data=body, headers=post_headers)
+        else:
+            # For other types (lists, etc.), try to send as json
+            response = requests.post(url, json=body, headers=post_headers)
         if simple:
             return deluge_string(response.text)
         else:
