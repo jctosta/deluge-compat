@@ -3,7 +3,6 @@
 from typing import Any
 
 from .functions import BUILTIN_FUNCTIONS
-from .salesiq.functions import visitorsession_get, visitorsession_set
 from .translator import DelugeTranslator, _invokeurl
 from .types import deluge_string
 
@@ -37,17 +36,11 @@ class DelugeRuntime:
 
         return context
 
-    def _create_zoho_namespace(self) -> dict[str, Any]:
+    def _create_zoho_namespace(self) -> Any:
         """Create the zoho namespace with SalesIQ functions."""
-        return {
-            "salesiq": {
-                "visitorsession": {
-                    "get": visitorsession_get,
-                    "set": visitorsession_set,
-                }
-            },
-            "adminuserid": "admin@example.com",  # Default admin user for mocking
-        }
+        from .zoho_namespace import ZohoNamespace
+
+        return ZohoNamespace()
 
     def update_context(self, additional_context: dict[str, Any]) -> None:
         """Add additional variables to the execution context."""

@@ -481,6 +481,18 @@ def _invokeurl(params: dict[str, Any]) -> Any:  # pyright: ignore[reportUnusedFu
     # Convert Map objects to dictionaries for JSON serialization
     if isinstance(body, Map):
         body = dict(body)
+    # Handle DelugeString that might contain JSON from Map concatenation
+    elif "DelugeString" in str(type(body)):
+        # If it's a DelugeString that looks like JSON, try to parse it
+        body_str = str(body)
+        if body_str.startswith("{") and body_str.endswith("}"):
+            import json
+
+            try:
+                body = json.loads(body_str)
+            except json.JSONDecodeError:
+                # If parsing fails, keep as string
+                pass
     elif hasattr(body, "__dict__"):
         body = body.__dict__
 

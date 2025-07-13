@@ -44,6 +44,24 @@ class Map(dict):
         """Get a value and treat it as JSON."""
         return self.get(key)
 
+    def __add__(self, other: Any) -> "DelugeString":
+        """Support Map + string concatenation by converting Map to JSON."""
+        import json
+
+        if isinstance(other, str):
+            result = json.dumps(dict(self)) + other
+            return DelugeString(result)
+        return NotImplemented
+
+    def __radd__(self, other: Any) -> "DelugeString":
+        """Support string + Map concatenation by converting Map to JSON."""
+        import json
+
+        if isinstance(other, str):
+            result = other + json.dumps(dict(self))
+            return DelugeString(result)
+        return NotImplemented
+
 
 class List(list):
     """Deluge List type - a list with Deluge-specific methods."""
