@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Python compatibility layer for executing Deluge scripts with full SalesIQ/Zobot support"
 readme = "README.md"
 authors = [
-    { name = "Carlos Tosta", email = "jctosta@gmail.com" }
+    { name = "Carlos Tosta", email = "jctosta86@gmail.com" }
 ]
 license = { file = "LICENSE"}
 classifiers = [
@@ -42,9 +42,9 @@ dev = [
 slim = []
 
 [project.scripts]
-deluge-run = "deluge_compat.cli_run:app"
-deluge-translate = "deluge_compat.cli_translate:app"
-deluge-chat = "deluge_compat.cli_chat:app"
+deluge-run = "deluge_compat.cli:run_main"
+deluge-translate = "deluge_compat.cli:translate_main"
+deluge-chat = "deluge_compat.cli_chat:chat_main"
 
 [project.urls]
 Homepage = "https://github.com/jctosta/deluge-compat"
