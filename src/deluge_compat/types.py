@@ -345,9 +345,12 @@ class DelugeString(str):
         """Convert XML to List."""
         return List([str(self)])
 
-    def getJSON(self) -> Map:
-        """Alias for toMap."""
-        return self.toMap()
+    def getJSON(self, key: str | None = None) -> Map | Any:
+        """Parse string as JSON and optionally get a specific key."""
+        parsed_json = self.toMap()
+        if key is None:
+            return parsed_json
+        return parsed_json.get(key)
 
     def toJSONList(self) -> List:
         """Parse string as JSON array into List."""

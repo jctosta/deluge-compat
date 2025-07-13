@@ -383,14 +383,12 @@ class DelugeTranslator:
     def _wrap_string_literals(self, text: str) -> str:
         """Wrap string literals with deluge_string() calls."""
 
-        # Find string literals (content within quotes)
-        def replace_string(match):
-            quote_char = match.group(1)
-            content = match.group(2)
-            return f"deluge_string({quote_char}{content}{quote_char})"
+        # Handle double quoted strings with proper escape handling
+        text = re.sub(r'"((?:[^"\\]|\\.)*)\"', lambda m: f'deluge_string("{m.group(1)}")', text)
 
-        # Handle both single and double quoted strings
-        text = re.sub(r'(["\'])([^"\']*)\1', replace_string, text)
+        # Handle single quoted strings with proper escape handling
+        text = re.sub(r"'((?:[^'\\]|\\.)*)'", lambda m: f"deluge_string('{m.group(1)}')", text)
+
         return text
 
     def _translate_string_methods(self, text: str) -> str:

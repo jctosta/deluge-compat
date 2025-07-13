@@ -71,6 +71,51 @@ class TestEdgeCases:
         result = run_deluge_script(script)
         assert str(result) == "Test quote and BACKslash"
 
+    def test_complex_string_escaping(self):
+        """Test complex string escaping patterns that were causing syntax errors."""
+        script = r"""
+        msg = "Test backslash escaping";
+        msg_escaped = msg.replaceAll("\\","\\\\");
+
+        // Test quote escaping
+        quote_msg = "Test quote";
+        quote_escaped = quote_msg.replaceAll("\"","\\\"");
+
+        result = Map();
+        result.put("backslash", msg_escaped);
+        result.put("quote", quote_escaped);
+        return result;
+        """
+
+        result = run_deluge_script(script)
+        assert str(result.get("backslash")) == "Test backslash escaping"
+        assert str(result.get("quote")) == "Test quote"
+
+    def test_zoho_json_parsing_syntax(self):
+        """Test Zoho-style JSON parsing with getJSON(key) parameters."""
+        script = """
+        // Mock API response as JSON string
+        apiResponse = "{\\"replies\\": {\\"text\\": \\"Hello World\\"}, \\"thread_id\\": \\"12345\\"}";
+
+        // Test the Zoho syntax that should work
+        replyText = apiResponse.getJSON("replies").getJSON("text");
+        thread_id = apiResponse.getJSON("thread_id");
+
+        // Test missing key handling
+        missing = apiResponse.getJSON("nonexistent");
+
+        result = Map();
+        result.put("replyText", replyText);
+        result.put("thread_id", thread_id);
+        result.put("missing", missing);
+        return result;
+        """
+
+        result = run_deluge_script(script)
+        assert str(result.get("replyText")) == "Hello World"
+        assert str(result.get("thread_id")) == "12345"
+        assert result.get("missing") is None
+
     def test_zoho_salesiq_visitorsession_functions(self):
         """Test Zoho SalesIQ visitorsession functions."""
         script = """
