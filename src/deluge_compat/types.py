@@ -1,9 +1,9 @@
 """Deluge-compatible data types."""
 
 import json
-from typing import Any, Union, Optional
-from datetime import datetime
 import re
+from datetime import datetime
+from typing import Any
 
 
 class Map(dict):
@@ -115,7 +115,7 @@ class List(list):
             else:
                 yield item
 
-    def sublist(self, start_index: int, end_index: Optional[int] = None) -> "List":
+    def sublist(self, start_index: int, end_index: int | None = None) -> "List":
         """Return a sublist."""
         if end_index is None:
             end_index = len(self)
@@ -226,17 +226,17 @@ class DelugeString(str):
         idx = self.rfind(substring)
         return idx if idx != -1 else -1
 
-    def substring(self, start: int, end: Optional[int] = None) -> "DelugeString":
+    def substring(self, start: int, end: int | None = None) -> "DelugeString":
         """Get substring."""
         if end is None:
             return DelugeString(self[start:])
         return DelugeString(self[start:end])
 
-    def subString(self, start: int, end: Optional[int] = None) -> "DelugeString":
+    def subString(self, start: int, end: int | None = None) -> "DelugeString":
         """Alias for substring."""
         return self.substring(start, end)
 
-    def subText(self, start: int, end: Optional[int] = None) -> "DelugeString":
+    def subText(self, start: int, end: int | None = None) -> "DelugeString":
         """Alias for substring."""
         return self.substring(start, end)
 
@@ -279,7 +279,7 @@ class DelugeString(str):
             else:
                 raise ValueError("String does not represent a JSON object")
         except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON: {e}")
+            raise ValueError(f"Invalid JSON: {e}") from e
 
     def toDate(self) -> datetime:
         """Parse string as date."""
@@ -320,8 +320,8 @@ class DelugeString(str):
             if self.startswith("0x") or self.startswith("0X"):
                 return int(self, 16)
             return int(self)
-        except ValueError:
-            raise ValueError(f"Cannot convert to long: {self}")
+        except ValueError as e:
+            raise ValueError(f"Cannot convert to long: {self}") from e
 
     def toXmlList(self) -> List:
         """Convert XML to List."""
@@ -344,7 +344,7 @@ class DelugeString(str):
             else:
                 raise ValueError("String does not represent a JSON array")
         except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON: {e}")
+            raise ValueError(f"Invalid JSON: {e}") from e
 
     def leftPad(self, pad_char: str, length: int) -> "DelugeString":
         """Pad string on the left."""
@@ -364,7 +364,7 @@ def deluge_string(s: str) -> DelugeString:
     return DelugeString(s)
 
 
-def _convert_json_to_deluge_types(obj: Any) -> Union[Map, List, DelugeString, Any]:
+def _convert_json_to_deluge_types(obj: Any) -> Map | List | DelugeString | Any:
     """Recursively convert JSON objects to Deluge types."""
     if isinstance(obj, dict):
         result = Map()

@@ -1,8 +1,10 @@
 """Deluge script runtime environment."""
 
-from typing import Any, Dict
-from .translator import DelugeTranslator, _invokeurl
+from typing import Any
+
 from .functions import BUILTIN_FUNCTIONS
+from .salesiq.functions import visitorsession_get, visitorsession_set
+from .translator import DelugeTranslator, _invokeurl
 from .types import deluge_string
 
 
@@ -13,7 +15,7 @@ class DelugeRuntime:
         self.translator = DelugeTranslator()
         self.context = self._create_base_context()
 
-    def _create_base_context(self) -> Dict[str, Any]:
+    def _create_base_context(self) -> dict[str, Any]:
         """Create the base execution context with built-in functions and types."""
         context = BUILTIN_FUNCTIONS.copy()
 
@@ -28,12 +30,26 @@ class DelugeRuntime:
                 "False": False,
                 "deluge_string": deluge_string,
                 "_invokeurl": _invokeurl,
+                # Add zoho namespace for SalesIQ compatibility
+                "zoho": self._create_zoho_namespace(),
             }
         )
 
         return context
 
-    def update_context(self, additional_context: Dict[str, Any]) -> None:
+    def _create_zoho_namespace(self) -> dict[str, Any]:
+        """Create the zoho namespace with SalesIQ functions."""
+        return {
+            "salesiq": {
+                "visitorsession": {
+                    "get": visitorsession_get,
+                    "set": visitorsession_set,
+                }
+            },
+            "adminuserid": "admin@example.com",  # Default admin user for mocking
+        }
+
+    def update_context(self, additional_context: dict[str, Any]) -> None:
         """Add additional variables to the execution context."""
         self.context.update(additional_context)
 
@@ -89,7 +105,7 @@ _result = _deluge_script()
     def execute_file(self, file_path: str, **context) -> Any:
         """Execute Deluge code from a file."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 deluge_code = f.read()
 
             if context:
@@ -97,8 +113,8 @@ _result = _deluge_script()
 
             return self.execute(deluge_code)
 
-        except FileNotFoundError:
-            raise DelugeRuntimeError(f"Deluge script file not found: {file_path}")
+        except FileNotFoundError as e:
+            raise DelugeRuntimeError(f"Deluge script file not found: {file_path}") from e
         except Exception as e:
             raise DelugeRuntimeError(f"Error reading Deluge script file: {e}") from e
 

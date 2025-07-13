@@ -16,6 +16,11 @@ class TestTranslationAPI:
 
         python_code = translate_deluge_to_python(deluge_script)
 
+        # Check PEP 723 header
+        assert "# /// script" in python_code
+        assert "# dependencies = [" in python_code
+        assert '#   "deluge-compat"' in python_code
+
         # Check imports are included
         assert "from deluge_compat import" in python_code
         assert "from deluge_compat.functions import *" in python_code
@@ -107,3 +112,41 @@ class TestTranslationAPI:
         # Code should be preserved
         assert "x = 10" in python_code
         assert "y = 20" in python_code
+
+    def test_translation_without_pep723(self):
+        """Test translation without PEP 723 header."""
+        deluge_script = """
+        result = Map();
+        result.put("test", "value");
+        return result;
+        """
+
+        python_code = translate_deluge_to_python(deluge_script, pep723_compatible=False)
+
+        # Should not have PEP 723 header
+        assert "# /// script" not in python_code
+        assert "# dependencies = [" not in python_code
+
+        # Should still have imports and wrapper
+        assert "from deluge_compat import" in python_code
+        assert "def deluge_script():" in python_code
+
+    def test_translation_with_all_options(self):
+        """Test translation with various option combinations."""
+        deluge_script = "x = 42;"
+
+        # Raw code without wrapper and without PEP 723
+        raw_code = translate_deluge_to_python(
+            deluge_script, wrap_in_function=False, pep723_compatible=False
+        )
+        assert "x = 42" in raw_code
+        assert "# /// script" not in raw_code
+        assert "def deluge_script():" not in raw_code
+
+        # Wrapped code without PEP 723
+        wrapped_no_pep723 = translate_deluge_to_python(
+            deluge_script, wrap_in_function=True, pep723_compatible=False
+        )
+        assert "x = 42" in wrapped_no_pep723
+        assert "# /// script" not in wrapped_no_pep723
+        assert "def deluge_script():" in wrapped_no_pep723

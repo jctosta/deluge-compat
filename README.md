@@ -8,309 +8,159 @@ A Python compatibility layer that allows you to execute Deluge scripts within Py
 - **Built-in Functions**: HTTP requests, encoding/decoding, mathematical operations, and utility functions
 - **Script Translation**: Converts Deluge syntax to executable Python code
 - **Runtime Environment**: Provides a sandboxed execution context for Deluge scripts
+- **Zobot Support**: Full SalesIQ/Zobot development with interactive chat simulation
 - **Easy Integration**: Simple API for running Deluge scripts from Python
 
 ## Installation
 
+### Full Installation (Recommended)
+
+Includes CLI tools, rich output formatting, and all features:
+
 ```bash
-# Clone the repository
+# Install from PyPI (when published)
+pip install deluge-compat
+
+# Or with uv
+uv add deluge-compat
+
+# Or from source
 git clone git@github.com:jctosta/deluge-compat.git
 cd deluge-compat
-
-# Install dependencies using uv
-uv add https://github.com/jctosta/deluge-compat.git
+uv install
 ```
+
+### Slim Installation
+
+For minimal dependencies in environments where you only need the core compatibility layer:
+
+```bash
+pip install deluge-compat[slim]
+# or
+uv add deluge-compat[slim]
+```
+
+The slim version excludes CLI tools and rich formatting but retains all core translation and execution capabilities.
 
 ## Quick Start
 
-### Basic Usage - Running Deluge Scripts
+### Command Line Tools
+
+The package provides CLI tools for working with Deluge scripts:
+
+#### Running Deluge Scripts
+
+```bash
+# Run a Deluge script file
+deluge-run my_script.dg
+
+# Run with JSON output
+deluge-run my_script.dg --json
+
+# Run with verbose output
+deluge-run my_script.dg --verbose
+```
+
+#### Translating Deluge Scripts to Python
+
+```bash
+# Translate a Deluge script to Python
+deluge-translate my_script.dg --output converted.py
+```
+
+#### Interactive Zobot Chat Testing
+
+```bash
+# Test Zobot scripts with interactive chat
+deluge-chat my_zobot.dg
+
+# Use specific visitor data
+deluge-chat my_zobot.dg --visitor-mock-source json --visitor-mock-file visitor_data.json
+
+# Automated testing with predefined messages
+deluge-chat my_zobot.dg --message-mock-source json --message-mock-file test_messages.json
+```
+
+For detailed usage information, see our [documentation](#documentation).
+
+### Basic Usage Examples
 
 ```python
 from deluge_compat import run_deluge_script
 
-# Simple Deluge script
-script = '''
-response = Map();
-response.put("greeting", "Hello World!");
-response.put("timestamp", "2024-01-01");
-return response;
-'''
+# Simple script execution
+result = run_deluge_script('''
+    response = Map();
+    response.put("greeting", "Hello World!");
+    return response;
+''')
+print(result)  # {'greeting': 'Hello World!'}
 
-result = run_deluge_script(script)
-print(result)  # {'greeting': 'Hello World!', 'timestamp': '2024-01-01'}
-```
-
-### String Operations
-
-```python
-script = '''
-text = "Hello World";
-result = Map();
-
-result.put("original", text);
-result.put("upper", text.toUpperCase());
-result.put("length", text.length());
-result.put("contains_world", text.contains("World"));
-
-return result;
-'''
-
-result = run_deluge_script(script)
-print(result['upper'])  # "HELLO WORLD"
-```
-
-### Working with Lists
-
-```python
-script = '''
-numbers = List();
-numbers.add(1);
-numbers.add(2);
-numbers.add(3);
-
-sum = 0;
-for each num in numbers {
-    sum = sum + num;
-}
-
-result = Map();
-result.put("numbers", numbers);
-result.put("sum", sum);
-return result;
-'''
-
-result = run_deluge_script(script)
-print(result['sum'])  # 6
-```
-
-### HTTP Operations
-
-```python
-script = '''
-url = "https://api.github.com/users/octocat";
-response = getUrl(url);
-
-result = Map();
-result.put("url", url);
-result.put("response_length", response.length());
-result.put("success", response.length() > 0);
-
-return result;
-'''
-
-result = run_deluge_script(script)
-```
-
-### Using Context Variables
-
-```python
-script = '''
-greeting = "Hello " + username + "!";
-result = Map();
-result.put("message", greeting);
-result.put("age_group", age >= 18 ? "adult" : "minor");
-return result;
-'''
-
-result = run_deluge_script(script, username="Alice", age=25)
+# With context variables
+result = run_deluge_script('''
+    greeting = "Hello " + username + "!";
+    return Map({"message": greeting});
+''', username="Alice")
 print(result['message'])  # "Hello Alice!"
 ```
 
-### Translating Deluge Scripts to Python
-
-The library can translate Deluge scripts to standalone Python code:
+### Translation to Python
 
 ```python
 from deluge_compat import translate_deluge_to_python
 
-deluge_script = '''
-numbers = List();
-numbers.add(1);
-numbers.add(2);
-numbers.add(3);
+# Generate PEP 723 compatible Python script
+python_code = translate_deluge_to_python('''
+    numbers = List([1, 2, 3]);
+    sum = 0;
+    for each num in numbers {
+        sum = sum + num;
+    }
+    return Map({"sum": sum});
+''')
 
-sum = 0;
-for each num in numbers {
-    sum = sum + num;
-}
-
-result = Map();
-result.put("sum", sum);
-return result;
-'''
-
-# Translate with wrapper (creates runnable Python script)
-python_code = translate_deluge_to_python(deluge_script)
-print(python_code)
-
-# Save to file
-with open("my_script.py", "w") as f:
+# Save and run with: uv run script.py
+with open("script.py", "w") as f:
     f.write(python_code)
-
-# Translate without wrapper (just the core code)
-raw_python = translate_deluge_to_python(deluge_script, wrap_in_function=False)
 ```
 
-## Supported Deluge Features
+## Documentation
 
-### Data Types
+### Core Features
+- **[Basic Usage Guide](docs/BASIC_USAGE.md)** - Complete guide to data types, functions, and common patterns
+- **[Zobot Support Guide](docs/ZOBOT_SUPPORT.md)** - SalesIQ/Zobot development with interactive testing
 
-- **Map**: Key-value pairs with methods like `put()`, `get()`, `containKey()`, `keys()`
-- **List**: Ordered collections with methods like `add()`, `size()`, `get()`, `sort()`
-- **String**: Enhanced strings with Deluge-specific methods like `contains()`, `substring()`, `toUpperCase()`
+### Quick Reference
 
-### Built-in Functions
-
-#### HTTP Functions
-- `getUrl(url, simple)` - HTTP GET requests
-- `postUrl(url, body, headers, simple)` - HTTP POST requests
-
-#### Encoding Functions
-- `base64Encode(text)` / `base64Decode(text)`
-- `encodeUrl(url)` / `urlDecode(url)`
-- `aesEncode(key, text)` / `aesDecode(key, encrypted)`
-
-#### Mathematical Functions
-- `abs(number)`, `cos(number)`, `sin(number)`, `tan(number)`
-- `log(number)`, `exp(number)`, `sqrt(number)`
-- `min(a, b)`, `max(a, b)`, `power(base, exp)`
-- `randomNumber(max, min)`
-
-#### Utility Functions
-- `info(message)` - Logging
-- `ifnull(value, default)` - Null checking
-- Collection constructors: `Map()`, `List()`, `Collection()`
-
-### Control Structures
-
-- **Conditional statements**: `if`, `else if`, `else`
-- **Loops**: `for each` loops
-- **Function calls** and **return statements**
-
-### String Methods
-
-All Deluge string methods are supported:
-- `contains()`, `startsWith()`, `endsWith()`
-- `toUpperCase()`, `toLowerCase()`, `trim()`
-- `substring()`, `indexOf()`, `lastIndexOf()`
-- `replaceAll()`, `replaceFirst()`
-- `toList()`, `toMap()`, `length()`
-- And many more...
+**Data Types**: Map, List, String with full Deluge method compatibility
+**Functions**: HTTP, encoding, math, utilities, and SalesIQ session management
+**CLI Tools**: `deluge-run`, `deluge-translate`, `deluge-chat`
+**Testing**: Comprehensive test suite with 28 SalesIQ tests + 115 core tests
 
 ## Examples
 
-### File Processing Example
+Check the `examples/` directory and documentation for comprehensive examples:
 
-```python
-# examples/file_example.py
-from deluge_compat import run_deluge_script
-
-script = '''
-// Process a list of files
-files = List();
-files.add("document.pdf");
-files.add("image.jpg");
-files.add("script.dg");
-
-result = Map();
-documents = List();
-images = List();
-
-for each file in files {
-    if(file.contains(".pdf") || file.contains(".doc")) {
-        documents.add(file);
-    } else if(file.contains(".jpg") || file.contains(".png")) {
-        images.add(file);
-    }
-}
-
-result.put("documents", documents);
-result.put("images", images);
-result.put("total_files", files.size());
-
-return result;
-'''
-
-result = run_deluge_script(script)
-print(f"Found {len(result['documents'])} documents")
-print(f"Found {len(result['images'])} images")
-```
-
-### API Integration Example
-
-```python
-script = '''
-// Simulate API data processing
-data = Map();
-data.put("user_id", "12345");
-data.put("email", "user@example.com");
-data.put("status", "active");
-
-// Process the data
-processed = Map();
-processed.put("id", data.get("user_id"));
-processed.put("email_domain", data.get("email").getSuffix("@"));
-processed.put("is_active", data.get("status").equals("active"));
-
-// Create response
-response = Map();
-response.put("success", true);
-response.put("data", processed);
-
-return response;
-'''
-
-result = run_deluge_script(script)
-```
+- **Basic Operations**: Data manipulation, string processing, control flow
+- **HTTP Integration**: API calls, data processing, error handling
+- **Zobot Scripts**: Customer service bots, session management, interactive chat
+- **Translation Examples**: Converting Deluge to Python with PEP 723 support
 
 ## Testing
 
-The project includes a comprehensive test suite with 115 tests achieving 100% success rate, covering all major Deluge functionality with full compatibility.
-
-### Running Tests
+Comprehensive test coverage with **143 total tests** (115 core + 28 SalesIQ) achieving **100% success rate**.
 
 ```bash
 # Run all tests
 uv run pytest
 
-# Run with verbose output
-uv run pytest -v
-
-# Run specific test categories
-uv run pytest tests/test_types.py          # Test data types
-uv run pytest tests/test_functions.py      # Test built-in functions
-uv run pytest tests/test_runtime.py        # Test script execution
-uv run pytest tests/test_showcase.py       # Test working features
-
-# Run legacy examples
-uv run python examples/test_example.py
-uv run python examples/http_example.py
+# Test specific functionality
+uv run pytest tests/test_types.py      # Data types
+uv run pytest tests/test_salesiq.py    # SalesIQ/Zobot features
+uv run pytest tests/test_showcase.py   # Working features demo
 ```
 
-### Test Coverage
-
-- **115 passing tests** with **100% success rate** covering all functionality
-- **Data Types**: Complete test coverage for Map, List, and DelugeString with all methods
-- **Functions**: All built-in functions (HTTP, encoding, math, utilities)
-- **Runtime**: Script execution, context variables, error handling, edge cases
-- **Integration**: Complex end-to-end scenarios and performance tests
-- **Translator**: Advanced syntax translation including nested structures and logical operators
-- **Showcase**: Comprehensive demonstrations of working features
-
-### Test Status
-
-✅ **Fully Working**: All major Deluge features are now fully supported:
-- All data types (Map, List, DelugeString) with complete method support
-- All built-in functions (HTTP, encoding, math, utilities)
-- Control structures (if/else, for loops, nested conditions)
-- String operations and manipulations
-- Mathematical operations and functions
-- Encoding/decoding operations
-- Complex nested data structures
-- Advanced translator features (logical operators, comments, edge cases)
-- Error handling and empty script processing
-
-🎉 **Production Ready**: The compatibility layer now handles all tested Deluge syntax patterns with 100% reliability
+✅ **Production Ready**: Complete Deluge language support with full SalesIQ/Zobot compatibility
 
 ## Project Structure
 
@@ -318,79 +168,38 @@ uv run python examples/http_example.py
 deluge-compat/
 ├── src/deluge_compat/
 │   ├── __init__.py          # Main API
-│   ├── types.py             # Deluge data types (Map, List, String)
+│   ├── types.py             # Deluge data types
 │   ├── functions.py         # Built-in functions
 │   ├── translator.py        # Deluge → Python translator
-│   └── runtime.py           # Execution environment
+│   ├── runtime.py           # Execution environment
+│   ├── cli_*.py             # CLI tools
+│   └── salesiq/             # SalesIQ/Zobot support
+├── docs/                    # Documentation
 ├── examples/                # Usage examples
-├── CLAUDE.md               # Development guidance
-└── README.md               # This file
+└── tests/                   # Test suite
 ```
 
 ## Architecture
 
-The compatibility layer consists of four main components:
+**Core Engine**: Types, Functions, Translator, Runtime
+**SalesIQ Layer**: Visitor/Message objects, session management, mock system
+**CLI Tools**: Interactive testing, script translation, chat simulation
+**Testing**: Comprehensive validation with 143 tests
 
-1. **Types Module** (`types.py`): Implements Deluge's data types with their specific methods
-2. **Functions Module** (`functions.py`): Provides all built-in Deluge functions
-3. **Translator** (`translator.py`): Converts Deluge syntax to Python syntax
-4. **Runtime** (`runtime.py`): Manages script execution and context
-
-## Limitations
-
-- **Error messages** may not match Deluge's native error format exactly
-- **Performance** may differ from native Deluge execution environment
-- **Advanced Deluge features** beyond the core language (platform-specific integrations) are not supported
-- **Debugging experience** differs from native Deluge development environment
-
-**Note**: All core Deluge language features including complex nested structures, control flow, and data operations are fully supported with 100% test coverage.
+All core Deluge features are fully supported with complete SalesIQ/Zobot compatibility.
 
 ## Contributing
 
+We welcome contributions! Please:
+
 1. Fork the repository
 2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+3. Add comprehensive tests
+4. Ensure all tests pass (`uv run pytest`)
+5. Run code quality checks (`uv run ruff check .` and `uv run pyright .`)
+6. Submit a pull request
 
-## Development
-
-### Setup
-
-```bash
-# Clone and setup
-git clone git@github.com:jctosta/deluge-compat.git
-cd deluge-compat
-
-# Install dependencies (pytest already included)
-uv install
-
-# Install in editable mode for development
-uv pip install -e .
-```
-
-### Testing
-
-```bash
-# Run full test suite
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=deluge_compat
-
-# Run specific test files
-uv run pytest tests/test_types.py -v
-
-# Test working features showcase
-uv run pytest tests/test_showcase.py -v
-```
-
-### Code Structure
-
-- `src/deluge_compat/types.py` - Add new data type methods
-- `src/deluge_compat/functions.py` - Add new built-in functions
-- `src/deluge_compat/translator.py` - Improve syntax translation
-- `tests/` - Add tests for new functionality
+See [development documentation](docs/) for detailed contribution guidelines.
 
 ## License
 

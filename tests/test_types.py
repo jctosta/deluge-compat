@@ -1,9 +1,10 @@
 """Test Deluge data types."""
 
-import pytest
 from datetime import datetime
 
-from deluge_compat.types import Map, List, DelugeString, deluge_string
+import pytest
+
+from deluge_compat.types import DelugeString, List, Map, deluge_string
 
 
 class TestMap:

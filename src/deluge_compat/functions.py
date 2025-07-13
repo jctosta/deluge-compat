@@ -1,17 +1,17 @@
 """Built-in Deluge functions."""
 
-import requests
 import base64
-import urllib.parse
-import random
 import math
-from typing import Any, Dict, Union, Optional
-from .types import Map, List, DelugeString, deluge_string
+import random
+import urllib.parse
+from typing import Any
+
+import requests
+
+from .types import DelugeString, List, Map, deluge_string
 
 
-def getUrl(
-    url: str, simple: bool = True, headers: Optional[Dict[str, str]] = None
-) -> Union[str, Map]:
+def getUrl(url: str, simple: bool = True, headers: dict[str, str] | None = None) -> str | Map:
     """Perform a GET request to URL."""
     try:
         response = requests.get(url, headers=headers or {})
@@ -34,10 +34,10 @@ def getUrl(
 
 def postUrl(
     url: str,
-    body: Optional[Map] = None,
-    headers: Optional[Map] = None,
+    body: Map | None = None,
+    headers: Map | None = None,
     simple: bool = True,
-) -> Union[str, Map]:
+) -> str | Map:
     """Perform a POST request to URL."""
     try:
         post_headers = dict(headers) if headers else {}
@@ -119,49 +119,47 @@ def aesDecode(key: str, encrypted_text: str) -> DelugeString:
         return deluge_string("")
 
 
-def abs_func(number: Union[int, float]) -> Union[int, float]:
+def abs_func(number: int | float) -> int | float:
     """Absolute value of a number."""
     return abs(number)
 
 
-def cos_func(number: Union[int, float]) -> float:
+def cos_func(number: int | float) -> float:
     """Cosine of an angle."""
     return math.cos(number)
 
 
-def sin_func(number: Union[int, float]) -> float:
+def sin_func(number: int | float) -> float:
     """Sine of an angle."""
     return math.sin(number)
 
 
-def tan_func(number: Union[int, float]) -> float:
+def tan_func(number: int | float) -> float:
     """Tangent of an angle."""
     return math.tan(number)
 
 
-def log_func(number: Union[int, float]) -> float:
+def log_func(number: int | float) -> float:
     """Natural logarithm."""
     return math.log(number)
 
 
-def min_func(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+def min_func(a: int | float, b: int | float) -> int | float:
     """Minimum of two numbers."""
     return min(a, b)
 
 
-def max_func(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+def max_func(a: int | float, b: int | float) -> int | float:
     """Maximum of two numbers."""
     return max(a, b)
 
 
-def exp_func(number: Union[int, float]) -> float:
+def exp_func(number: int | float) -> float:
     """Exponential function (e^x)."""
     return math.exp(number)
 
 
-def power_func(
-    base: Union[int, float], exponent: Union[int, float]
-) -> Union[int, float]:
+def power_func(base: int | float, exponent: int | float) -> int | float:
     """Power function."""
     return pow(base, exponent)
 
@@ -171,7 +169,7 @@ def round_func(number: float, decimals: int = 0) -> float:
     return round(number, decimals)
 
 
-def sqrt_func(number: Union[int, float]) -> float:
+def sqrt_func(number: int | float) -> float:
     """Square root."""
     return math.sqrt(number)
 
@@ -207,8 +205,27 @@ def info(*args) -> None:
 
 
 def sendemail(*args, **kwargs) -> Map:
-    """Placeholder for sending email."""
-    return Map({"status": "email_sent"})
+    """Mock email sending function compatible with Deluge syntax."""
+    # Log the email details for debugging/testing
+    email_data = Map()
+    email_data.put("status", "email_sent")
+    email_data.put("from", kwargs.get("from", ""))
+    email_data.put("to", kwargs.get("to", ""))
+    email_data.put("subject", kwargs.get("subject", ""))
+    email_data.put("message", kwargs.get("message", ""))
+
+    # Print email details in debug mode
+    if kwargs.get("debug", False):
+        print(f"[MOCK EMAIL] From: {email_data.get('from')}")
+        print(f"[MOCK EMAIL] To: {email_data.get('to')}")
+        print(f"[MOCK EMAIL] Subject: {email_data.get('subject')}")
+        print(f"[MOCK EMAIL] Message: {email_data.get('message')}")
+
+    return email_data
+
+
+# Create alias for Deluge compatibility
+sendmail = sendemail
 
 
 def sendsms(*args, **kwargs) -> Map:
@@ -265,6 +282,7 @@ BUILTIN_FUNCTIONS = {
     "randomNumber": randomNumber,
     "info": info,
     "sendemail": sendemail,
+    "sendmail": sendmail,
     "sendsms": sendsms,
     "pushNotification": pushNotification,
     "Collection": Collection,

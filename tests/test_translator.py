@@ -1,6 +1,7 @@
 """Test Deluge to Python translator."""
 
 import pytest
+
 from deluge_compat.translator import DelugeTranslator, _invokeurl
 
 
@@ -58,9 +59,7 @@ class TestDelugeTranslator:
         python_code = self.translator.translate(deluge_code)
 
         assert "if age >= 18:" in python_code
-        assert (
-            'status = deluge_string("adult")' in python_code
-        )  # Don't check indentation
+        assert 'status = deluge_string("adult")' in python_code  # Don't check indentation
 
     def test_for_each_loop(self):
         """Test for each loop translation."""
@@ -137,13 +136,13 @@ class TestDelugeTranslator:
         users = List();
         users.add("Alice");
         users.add("Bob");
-        
+
         for each user in users {
             if(user.length() > 3) {
                 response.put(user, "long_name");
             }
         }
-        
+
         return response;
         """
         python_code = self.translator.translate(deluge_code)

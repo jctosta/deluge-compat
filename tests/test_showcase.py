@@ -1,6 +1,6 @@
 """Showcase tests demonstrating working Deluge compatibility features."""
 
-from deluge_compat import run_deluge_script, Map, List
+from deluge_compat import List, Map, run_deluge_script
 
 
 class TestWorkingFeatures:
@@ -67,12 +67,12 @@ class TestWorkingFeatures:
     def test_encoding_decoding_functions(self):
         """Demonstrate all encoding/decoding functions work."""
         from deluge_compat.functions import (
-            base64Encode,
+            aesDecode,
+            aesEncode,
             base64Decode,
+            base64Encode,
             encodeUrl,
             urlDecode,
-            aesEncode,
-            aesDecode,
         )
 
         original = "Hello World! & Special Characters 123"
@@ -97,14 +97,14 @@ class TestWorkingFeatures:
         """Demonstrate all mathematical functions work."""
         from deluge_compat.functions import (
             abs_func,
-            min_func,
-            max_func,
-            power_func,
-            sqrt_func,
             ceil_func,
             floor_func,
-            round_func,
+            max_func,
+            min_func,
+            power_func,
             randomNumber,
+            round_func,
+            sqrt_func,
         )
 
         # Basic math

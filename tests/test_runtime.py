@@ -1,8 +1,9 @@
 """Test Deluge runtime environment."""
 
 import pytest
+
 from deluge_compat.runtime import DelugeRuntime, DelugeRuntimeError, run_deluge_script
-from deluge_compat.types import Map, List
+from deluge_compat.types import List, Map
 
 
 class TestDelugeRuntime:
@@ -59,12 +60,12 @@ class TestDelugeRuntime:
         numbers.add(1);
         numbers.add(2);
         numbers.add(3);
-        
+
         sum = 0;
         for each num in numbers {
             sum = sum + num;
         }
-        
+
         result = Map();
         result.put("numbers", numbers);
         result.put("sum", sum);
@@ -82,12 +83,12 @@ class TestDelugeRuntime:
         script = """
         text = "Hello World";
         result = Map();
-        
+
         result.put("original", text);
         result.put("upper", text.toUpperCase());
         result.put("length", text.length());
         result.put("contains_hello", text.contains("Hello"));
-        
+
         return result;
         """
 
@@ -102,11 +103,11 @@ class TestDelugeRuntime:
         script = """
         age = 25;
         result = Map();
-        
+
         if(age >= 18) {
             status = "adult";
         }
-        
+
         result.put("age", age);
         result.put("status", status);
         return result;
@@ -121,14 +122,14 @@ class TestDelugeRuntime:
         """Test script with built-in function calls."""
         script = """
         result = Map();
-        
+
         encoded = base64Encode("Hello World");
         decoded = base64Decode(encoded);
-        
+
         result.put("encoded", encoded);
         result.put("decoded", decoded);
         result.put("match", decoded.equals("Hello World"));
-        
+
         return result;
         """
 
@@ -140,12 +141,12 @@ class TestDelugeRuntime:
         """Test script with mathematical operations."""
         script = """
         result = Map();
-        
+
         result.put("abs_neg", abs(-5));
         result.put("power", power(2, 3));
         result.put("min", min(10, 5));
         result.put("max", max(10, 5));
-        
+
         return result;
         """
 
@@ -247,22 +248,22 @@ class TestConvenienceFunctions:
         users.add("Alice");
         users.add("Bob");
         users.add("Charlie");
-        
+
         // Process the data
         result = Map();
         processed_users = List();
-        
+
         for each user in users {
             if(user.length() > 3) {
                 upper_user = user.toUpperCase();
                 processed_users.add(upper_user);
             }
         }
-        
+
         result.put("original_count", users.size());
         result.put("processed_count", processed_users.size());
         result.put("processed_users", processed_users);
-        
+
         return result;
         """
 

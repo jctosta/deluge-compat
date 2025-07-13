@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Test example showing how to use the Deluge compatibility layer."""
 
-import sys
 import os
+import sys
 
 # Add the src directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from deluge_compat import run_deluge_script, Map
+from deluge_compat import Map, run_deluge_script
 
 
 def test_simple_script():
@@ -20,18 +20,18 @@ def test_simple_script():
     message = "Hello from " + name + "!";
     response.put("greeting", message);
     response.put("success", true);
-    
+
     // Test list operations
     items = List();
     items.add("apple");
     items.add("banana");
     items.add("cherry");
-    
+
     response.put("items", items);
     response.put("item_count", items.size());
-    
+
     info "Script executed successfully";
-    
+
     return response;
     """
 
@@ -57,7 +57,7 @@ def test_string_operations():
     script = """
     text = "Hello World";
     result = Map();
-    
+
     result.put("original", text);
     result.put("upper", text.toUpperCase());
     result.put("lower", text.toLowerCase());
@@ -65,7 +65,7 @@ def test_string_operations():
     result.put("contains_world", text.contains("World"));
     result.put("starts_with_hello", text.startsWith("Hello"));
     result.put("substring", text.substring(0, 5));
-    
+
     return result;
     """
 
@@ -87,7 +87,7 @@ def test_conditional_logic():
     script = """
     score = 85;
     result = Map();
-    
+
     if(score >= 90) {
         grade = "A";
     } else if(score >= 80) {
@@ -97,10 +97,10 @@ def test_conditional_logic():
     } else {
         grade = "F";
     }
-    
+
     result.put("score", score);
     result.put("grade", grade);
-    
+
     return result;
     """
 
@@ -123,21 +123,21 @@ def test_loops():
     numbers.add(3);
     numbers.add(4);
     numbers.add(5);
-    
+
     sum = 0;
     squares = List();
-    
+
     for each num in numbers {
         sum = sum + num;
         square = num * num;
         squares.add(square);
     }
-    
+
     result = Map();
     result.put("numbers", numbers);
     result.put("sum", sum);
     result.put("squares", squares);
-    
+
     return result;
     """
 
@@ -158,16 +158,16 @@ def test_with_context():
     result.put("username", username);
     result.put("age", age);
     result.put("is_adult", age >= 18);
-    
+
     greeting = "Hello " + username + "!";
     if(age >= 18) {
         greeting = greeting + " You are an adult.";
     } else {
         greeting = greeting + " You are a minor.";
     }
-    
+
     result.put("greeting", greeting);
-    
+
     return result;
     """
 

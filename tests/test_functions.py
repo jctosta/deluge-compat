@@ -2,38 +2,38 @@
 
 import base64
 import urllib.parse
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from deluge_compat.functions import (
-    getUrl,
-    postUrl,
-    encodeUrl,
-    urlDecode,
-    urlEncode,
-    base64Encode,
-    base64Decode,
-    aesEncode,
-    aesDecode,
+    BUILTIN_FUNCTIONS,
     abs_func,
+    aesDecode,
+    aesEncode,
+    base64Decode,
+    base64Encode,
+    ceil_func,
     cos_func,
-    sin_func,
-    tan_func,
-    log_func,
-    min_func,
-    max_func,
+    encodeUrl,
     exp_func,
+    floor_func,
+    getUrl,
+    ifnull,
+    info,
+    log_func,
+    max_func,
+    min_func,
+    postUrl,
     power_func,
+    randomNumber,
+    replaceAll,
     round_func,
+    sin_func,
     sqrt_func,
+    tan_func,
     toDecimal,
     toHex,
-    ceil_func,
-    floor_func,
-    randomNumber,
-    info,
-    ifnull,
-    replaceAll,
-    BUILTIN_FUNCTIONS,
+    urlDecode,
+    urlEncode,
 )
 from deluge_compat.types import Map
 
@@ -266,9 +266,7 @@ class TestBuiltinFunctionsList:
         ]
 
         for func_name in expected_functions:
-            assert func_name in BUILTIN_FUNCTIONS, (
-                f"Function {func_name} not in BUILTIN_FUNCTIONS"
-            )
+            assert func_name in BUILTIN_FUNCTIONS, f"Function {func_name} not in BUILTIN_FUNCTIONS"
 
     def test_builtin_functions_callable(self):
         """Test that all functions in BUILTIN_FUNCTIONS are callable."""

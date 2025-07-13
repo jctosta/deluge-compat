@@ -10,11 +10,11 @@ def main():
     // Create a greeting message
     name = "World";
     greeting = "Hello " + name + "!";
-    
+
     result = Map();
     result.put("message", greeting);
     result.put("timestamp", "2024-01-01");
-    
+
     return result;
     """
 
@@ -33,23 +33,23 @@ def main():
     numbers.add(3);
     numbers.add(4);
     numbers.add(5);
-    
+
     sum = 0;
     evens = List();
-    
+
     for each num in numbers {
         sum = sum + num;
-        
+
         if(num % 2 == 0) {
             evens.add(num);
         }
     }
-    
+
     result = Map();
     result.put("sum", sum);
     result.put("evens", evens);
     result.put("count", numbers.size());
-    
+
     return result;
     """
 

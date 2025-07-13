@@ -1,7 +1,7 @@
 """Deluge to Python code translator."""
 
 import re
-from typing import Dict, Any
+from typing import Any
 
 
 class DelugeTranslator:
@@ -10,6 +10,7 @@ class DelugeTranslator:
     def __init__(self):
         self.indent_level = 0
         self.in_invokeurl = False
+        self.in_sendmail = False
         self.brace_stack = []  # Track opening braces and their contexts
 
     def translate(self, deluge_code: str) -> str:
@@ -17,6 +18,7 @@ class DelugeTranslator:
         # Reset state for each translation
         self.indent_level = 0
         self.in_invokeurl = False
+        self.in_sendmail = False
         self.brace_stack = []
 
         # Preprocess the code to handle } else { patterns
@@ -25,14 +27,17 @@ class DelugeTranslator:
         lines = preprocessed.split("\n")
         python_lines = []
 
+        self._last_line = ""
         for line in lines:
-            line = line.strip()
-            if not line:
+            original_line = line.strip()
+            if not original_line:
                 continue
 
-            translated = self._translate_line(line)
+            translated = self._translate_line(original_line)
             if translated:
                 python_lines.append(translated)
+
+            self._last_line = original_line
 
         return "\n".join(python_lines)
 
@@ -42,9 +47,7 @@ class DelugeTranslator:
         code = re.sub(r"}\s*else\s*{", "}\nelse {", code)
 
         # Handle } else if { patterns
-        code = re.sub(
-            r"}\s*else\s+if\s*\([^)]*\)\s*{", lambda m: "}\n" + m.group(0)[1:], code
-        )
+        code = re.sub(r"}\s*else\s+if\s*\([^)]*\)\s*{", lambda m: "}\n" + m.group(0)[1:], code)
 
         return code
 
@@ -143,6 +146,17 @@ class DelugeTranslator:
             return self._translate_invokeurl_end()
         elif self.in_invokeurl and ":" in line:
             return self._translate_invokeurl_param(line)
+
+        # Handle sendmail blocks
+        elif line.startswith("sendmail"):
+            return self._translate_sendmail_start(line)
+        elif line == "[" and hasattr(self, "_last_line") and self._last_line.startswith("sendmail"):
+            self.in_sendmail = True
+            return ""  # Skip the opening bracket
+        elif line == "]" and self.in_sendmail:
+            return self._translate_sendmail_end()
+        elif self.in_sendmail and ":" in line:
+            return self._translate_sendmail_param(line)
 
         # Handle function calls and statements
         elif line.startswith("info "):
@@ -394,8 +408,47 @@ class DelugeTranslator:
 
         return text
 
+    def _translate_sendmail_start(self, line: str) -> str:
+        """Start translating a sendmail block."""
+        # Don't set in_sendmail yet - wait for the opening bracket
+        self.sendmail_params = {}
 
-def _invokeurl(params: Dict[str, Any]) -> Any:
+        # Return the beginning of sendmail function call
+        return "sendmail("
+
+    def _translate_sendmail_param(self, line: str) -> str:
+        """Translate a sendmail parameter line."""
+        line = line.strip()
+
+        if ":" in line:
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+
+            # Remove quotes from key if present
+            if key.startswith('"') and key.endswith('"'):
+                key = key[1:-1]
+
+            # Handle value processing
+            if value.startswith('"') and value.endswith('"'):
+                # String literal
+                processed_value = value
+            else:
+                # Expression that needs evaluation
+                processed_value = self._translate_string_methods(value)
+
+            # Use **kwargs syntax to handle Python keywords like 'from'
+            return f'    **{{"{key}": {processed_value}}},'
+
+        return ""
+
+    def _translate_sendmail_end(self) -> str:
+        """End translating a sendmail block."""
+        self.in_sendmail = False
+        return ")"
+
+
+def _invokeurl(params: dict[str, Any]) -> Any:  # pyright: ignore[reportUnusedFunction]
     """Execute an HTTP request based on invokeurl parameters."""
     from .functions import getUrl, postUrl
 
@@ -415,9 +468,7 @@ def _invokeurl(params: Dict[str, Any]) -> Any:
 
             method = request_type.lower()
             if hasattr(requests, method):
-                response = getattr(requests, method)(
-                    url, json=parameters, headers=headers
-                )
+                response = getattr(requests, method)(url, json=parameters, headers=headers)
                 return response.text
             else:
                 return "Unsupported HTTP method"
