@@ -139,6 +139,24 @@ class DelugeTranslator:
             self.brace_stack.append("block")
             return ""
 
+        # Handle sendmail blocks (check before invokeurl since they can both use ];)
+        elif line.startswith("sendmail["):
+            # Handle sendmail[ on the same line
+            self.in_sendmail = True
+            return self._translate_sendmail_start(line)
+        elif line.startswith("sendmail"):
+            return self._translate_sendmail_start(line)
+        elif line == "[" and hasattr(self, "_last_line") and self._last_line.startswith("sendmail"):
+            self.in_sendmail = True
+            return ""  # Skip the opening bracket
+        elif (line == "];" or line == "];") and self.in_sendmail:
+            # Handle closing bracket with semicolon
+            return self._translate_sendmail_end()
+        elif line == "]" and self.in_sendmail:
+            return self._translate_sendmail_end()
+        elif self.in_sendmail and ":" in line:
+            return self._translate_sendmail_param(line)
+
         # Handle invokeurl blocks (check this early, before error detection)
         elif line.startswith("invokeurl"):
             return self._translate_invokeurl_start(line)
@@ -146,17 +164,6 @@ class DelugeTranslator:
             return self._translate_invokeurl_end()
         elif self.in_invokeurl and ":" in line:
             return self._translate_invokeurl_param(line)
-
-        # Handle sendmail blocks
-        elif line.startswith("sendmail"):
-            return self._translate_sendmail_start(line)
-        elif line == "[" and hasattr(self, "_last_line") and self._last_line.startswith("sendmail"):
-            self.in_sendmail = True
-            return ""  # Skip the opening bracket
-        elif line == "]" and self.in_sendmail:
-            return self._translate_sendmail_end()
-        elif self.in_sendmail and ":" in line:
-            return self._translate_sendmail_param(line)
 
         # Handle function calls and statements
         elif line.startswith("info "):
@@ -454,8 +461,11 @@ class DelugeTranslator:
                 # Expression that needs evaluation
                 processed_value = self._translate_string_methods(value)
 
-            # Use **kwargs syntax to handle Python keywords like 'from'
-            return f'    **{{"{key}": {processed_value}}},'
+            # Handle Python keywords by using **{} syntax for them
+            if key in ["from", "to", "import", "class", "def", "if", "else", "for", "while"]:
+                return f'    **{{"{key}": {processed_value}}},'
+            else:
+                return f"    {key}={processed_value},"
 
         return ""
 

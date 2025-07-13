@@ -167,6 +167,32 @@ class TestEdgeCases:
         assert "@" in admin_email
         assert result.get("email_format") is True
 
+    def test_sendmail_functionality(self):
+        """Test sendmail block syntax translation and execution."""
+        script = """
+        // Test sendmail with various parameter types
+        session_map = Map();
+        session_map.put("threadId", "test123");
+
+        sendmail[
+            from :zoho.adminuserid
+            to :"admin@examplelab.com"
+            subject :"Web Chat Executed"
+            message :"<div>Test content</div>"
+        ];
+
+        result = Map();
+        result.put("admin_email", zoho.adminuserid);
+        result.put("session_data", session_map);
+        return result;
+        """
+
+        result = run_deluge_script(script)
+
+        # Verify sendmail executed successfully and other operations work
+        assert "@" in str(result.get("admin_email"))
+        assert result.get("session_data").get("threadId") == "test123"
+
     def test_complex_production_scenario(self):
         """Test a complex scenario combining multiple edge cases."""
         script = """
