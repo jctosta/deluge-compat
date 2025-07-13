@@ -1,5 +1,6 @@
 """Zoho namespace objects for proper dot notation access."""
 
+from collections.abc import Callable
 from typing import Any
 
 from .salesiq.functions import visitorsession_get, visitorsession_set
@@ -31,3 +32,4 @@ class ZohoNamespace:
     def __init__(self):
         self.salesiq = SalesIQNamespace()
         self.adminuserid = deluge_string("admin@example.com")
+        self.invokeurl: Callable[..., Any] | None = None  # Can be overridden by CLI tools

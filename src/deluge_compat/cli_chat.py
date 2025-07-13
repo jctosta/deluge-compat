@@ -273,26 +273,23 @@ def _run_chat_session(
         rprint(f"[yellow]Session limit reached ({session_limit} messages).[/yellow]")
 
 
-def _create_zoho_namespace(mock_manager: MockManager) -> dict[str, Any]:
+def _create_zoho_namespace(mock_manager: MockManager) -> Any:
     """Create the zoho namespace with SalesIQ functions."""
-    from .salesiq.functions import visitorsession_get, visitorsession_set
+    from .zoho_namespace import ZohoNamespace
 
-    # Mock invokeurl to use the API mock system
+    # Create the standard zoho namespace
+    zoho = ZohoNamespace()
+
+    # Override invokeurl with mock for API calls
     def mock_invokeurl(
         url: str, type: str = "GET", body: Any = None, headers: dict | None = None
     ) -> dict[str, Any]:
         return mock_manager.mock_api_call(url, type, body)
 
-    return {
-        "salesiq": {
-            "visitorsession": {
-                "get": visitorsession_get,
-                "set": visitorsession_set,
-            }
-        },
-        "adminuserid": "admin@example.com",  # Mock admin user
-        "invokeurl": mock_invokeurl,  # Override invokeurl with mock
-    }
+    # Add the mock invokeurl function to the namespace
+    zoho.invokeurl = mock_invokeurl
+
+    return zoho
 
 
 def _handle_bot_response(response, debug: bool) -> None:
