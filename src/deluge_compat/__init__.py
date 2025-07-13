@@ -3,7 +3,7 @@
 This module provides compatibility for running Deluge scripts in Python.
 """
 
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 
 from typing import Any
 
