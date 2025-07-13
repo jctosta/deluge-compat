@@ -138,7 +138,13 @@ known-first-party = ["deluge_compat"]
 
 [tool.pyright]
 include = ["src", "tests"]
-exclude = ["**/__pycache__"]
+exclude = [
+    "**/__pycache__",
+    "**/.venv",
+    "**/venv",
+    "**/node_modules",
+    "**/.git"
+]
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.10"
@@ -150,3 +156,5 @@ reportUnusedClass = true
 reportUnusedFunction = true
 reportUnusedVariable = true
 reportDuplicateImport = true
+# Don't check dependencies
+stubPath = ""
